@@ -21,7 +21,7 @@ public class TestConfig {
 
     @Bean("services.data.altdatasource")
     public DataSource getSecondaryDataSource() {
-      return new DriverManagerDataSource("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "user", "password");
+      return new DriverManagerDataSource("jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1", "user", "password");
     }
 
     @Bean
