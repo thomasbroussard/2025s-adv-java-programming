@@ -44,4 +44,22 @@ public class TestQuestionRepository {
         connection.close();
     }
 
+    @Test
+    public void testQuestionRepository_findByTitle_nominal() throws SQLException {
+        //given
+        Question question = new Question("Test");
+        questionRepository.create(question);
+
+        //when
+        questionRepository.findByTitle("Tes");
+
+
+        //then
+        Connection connection = dataSource.getConnection();
+        ResultSet resultSet = connection.prepareStatement("SELECT title FROM question").executeQuery();
+        resultSet.next();
+        Assertions.assertEquals(question.getTitle(), resultSet.getString("title"));
+        connection.close();
+    }
+
 }
