@@ -16,7 +16,7 @@ public class TestConfig {
 
     @Bean("services.data.datasource")
     public DataSource getPrimaryDataSource() {
-      return new DriverManagerDataSource("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+      return new DriverManagerDataSource("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "user","password");
     }
 
     @Bean("services.data.altdatasource")
