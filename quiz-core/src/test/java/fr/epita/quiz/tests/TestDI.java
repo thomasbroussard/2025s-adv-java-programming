@@ -14,7 +14,7 @@ import java.sql.SQLException;
 
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = fr.epita.quiz.tests.TestConfig.class)
+@ContextConfiguration(classes = {TestConfig.class})
 public class TestDI {
 
     @Autowired

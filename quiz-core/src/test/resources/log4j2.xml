@@ -12,12 +12,10 @@
         <Root level="trace">
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="org.springframework" level="debug">
+        <Logger name="org.springframework" level="trace">
             <AppenderRef ref="Console" />
         </Logger>
-        <Logger name="org.springframework.test" level="error">
-            <AppenderRef ref="Console" />
-        </Logger>
+
 
     </Loggers>
 </Configuration>

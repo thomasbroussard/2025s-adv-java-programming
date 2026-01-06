@@ -2,6 +2,7 @@ package fr.epita.quiz.tests;
 
 
 import fr.epita.quiz.datamodel.Question;
+import fr.epita.quiz.services.JDBCQuestionRepository;
 import fr.epita.quiz.services.QuestionRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
