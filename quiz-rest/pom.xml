@@ -5,29 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>2025s-adv-java-programming</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <modules>
-        <module>calculator</module>
-        <module>quiz-core</module>
-        <module>quiz-rest</module>
-    </modules>
+    <artifactId>quiz-rest</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>6.0.1</junit.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <groupId>org.example</groupId>
+            <version>1.0-SNAPSHOT</version>
+            <artifactId>quiz-core</artifactId>
         </dependency>
-
     </dependencies>
+
+
 </project>
