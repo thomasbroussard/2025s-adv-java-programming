@@ -86,5 +86,10 @@ public class JDBCQuestionRepository implements QuestionRepository {
         return  questions;
     }
 
+    @Override
+    public List<Question> getAllQuestionsWithLimit(int maxRow) throws PersistenceException {
+        return List.of();
+    }
+
 
 }

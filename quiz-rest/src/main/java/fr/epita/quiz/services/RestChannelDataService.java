@@ -65,12 +65,15 @@ public class RestChannelDataService {
         Question question = new Question();
         question.setTitle(questionDTO.getTitle());
         this.questionRepository.create(question);
-        for (MCQChoiceDTO mcqChoiceDTO : questionDTO.getChoices()){
-            MCQChoice mcqChoice = new MCQChoice();
-            mcqChoice.setTitle(mcqChoiceDTO.getChoiceTitle());
-            mcqChoice.setValid(mcqChoiceDTO.getValid());
-            this.mcqChoiceRepository.create(mcqChoice);
-            mcqChoiceDTO.setId(mcqChoice.getId());
+        List<MCQChoiceDTO> choices = questionDTO.getChoices();
+        if (choices != null) {
+            for (MCQChoiceDTO mcqChoiceDTO : choices){
+                MCQChoice mcqChoice = new MCQChoice();
+                mcqChoice.setTitle(mcqChoiceDTO.getChoiceTitle());
+                mcqChoice.setValid(mcqChoiceDTO.getValid());
+                this.mcqChoiceRepository.create(mcqChoice);
+                mcqChoiceDTO.setId(mcqChoice.getId());
+            }
         }
         questionDTO.setId(question.getId());
         return question;

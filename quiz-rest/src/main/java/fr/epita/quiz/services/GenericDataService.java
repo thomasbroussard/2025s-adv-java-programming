@@ -6,6 +6,7 @@ import fr.epita.quiz.services.api.MCQChoiceRepository;
 import fr.epita.quiz.services.api.QuestionRepository;
 import fr.epita.quiz.services.api.exceptions.PersistenceException;
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 

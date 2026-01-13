@@ -1,4 +1,4 @@
-package fr.epita.quiz.launcher;
+package fr.epita.quiz.rest;
 
 
 import fr.epita.quiz.datamodel.Question;
@@ -37,7 +37,7 @@ public class QuizController {
     }
 
 
-    @GetMapping("questions/${id}")
+    @GetMapping("questions/{id}")
     public QuestionDTO getQuestion(@PathVariable("id") String id){
         try {
             return dataService.getQuestion(Integer.parseInt(id));
