@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #141416;
+            --bg-tertiary: #1c1c1f;
+            --bg-hover: #242428;
+            --border: #2a2a2e;
+            --border-light: #3a3a3f;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 32px 0;
+            position: fixed;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 0 24px;
+            margin-bottom: 40px;
+        }
+
+        .logo h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .logo span {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            padding: 0 24px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 0.875rem;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-right: 2px solid var(--accent);
+        }
+
+        .nav-item .method {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+        }
+
+        .nav-item .method.get { color: #22c55e; }
+        .nav-item .method.post { color: #3b82f6; }
+
+        .status-card {
+            margin: 0 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .status-row:not(:last-child) {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-row .label {
+            color: var(--text-muted);
+        }
+
+        .status-row .value {
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .status-dot.offline { background: var(--error); }
+
+        /* Main Content */
+        .main {
+            margin-left: 280px;
+            padding: 48px;
+            max-width: 1200px;
+        }
+
+        .page-header {
+            margin-bottom: 48px;
+        }
+
+        .page-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .card-header .endpoint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.15s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-light);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Questions List */
+        .questions-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .question-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 12px;
+            transition: all 0.15s ease;
+        }
+
+        .question-card:hover {
+            border-color: var(--border-light);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .question-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .question-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        .choices-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .choice-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .choice-item.valid {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .choice-item.invalid {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .choice-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .choice-item.valid .choice-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .choice-item.invalid .choice-icon {
+            background: var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Choice Input */
+        .choice-input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .choice-input-row input[type="text"] {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .choice-input-row input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--success);
+        }
+
+        .remove-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background: var(--error-bg);
+            color: var(--error);
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .remove-btn:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Response Area */
+        .response-area {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .response-area pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--success);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.7;
+        }
+
+        .response-area.error pre {
+            color: var(--error);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Button Row */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Quiz <span>API</span></h1>
+            </div>
+
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Endpoints</div>
+                    <div class="nav-item active" onclick="showSection('list')">
+                        <span class="method get">GET</span>
+                        <span>List Questions</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('get')">
+                        <span class="method get">GET</span>
+                        <span>Get by ID</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('create')">
+                        <span class="method post">POST</span>
+                        <span>Create Question</span>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="status-card">
+                <div class="status-row">
+                    <span class="label">Status</span>
+                    <span class="value">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="apiStatus">Checking...</span>
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="label">Questions</span>
+                    <span class="value" id="totalQuestions">-</span>
+                </div>
+                <div class="status-row">
+                    <span class="label">Choices</span>
+                    <span class="value" id="totalChoices">-</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- List Questions Section -->
+            <section id="section-list">
+                <div class="page-header">
+                    <h2>Questions</h2>
+                    <p>Browse all questions in the database</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>All Questions</h3>
+                        <span class="endpoint">GET /</span>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary" onclick="getAllQuestions()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                                <path d="M21 3v5h-5"/>
+                            </svg>
+                            Refresh
+                        </button>
+                        <div class="questions-container" id="questionsList" style="margin-top: 20px;">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                    <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                    <path d="M9 12h6M9 16h6"/>
+                                </svg>
+                                <p>Click refresh to load questions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Get by ID Section -->
+            <section id="section-get" style="display: none;">
+                <div class="page-header">
+                    <h2>Get Question</h2>
+                    <p>Retrieve a specific question by its ID</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Fetch Question</h3>
+                        <span class="endpoint">GET /questions/{id}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Question ID</label>
+                            <input type="number" id="questionId" placeholder="Enter question ID">
+                        </div>
+                        <button class="btn btn-primary" onclick="getQuestionById()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                            Fetch
+                        </button>
+                        <div class="response-area" id="singleQuestionResponse" style="display: none;">
+                            <pre></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Create Question Section -->
+            <section id="section-create" style="display: none;">
+                <div class="page-header">
+                    <h2>Create Question</h2>
+                    <p>Add a new question with multiple choice answers</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>New Question</h3>
+                        <span class="endpoint">POST /questions</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Question Title</label>
+                            <input type="text" id="newQuestionTitle" placeholder="What would you like to ask?">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Answer Choices</label>
+                            <div id="choicesContainer">
+                                <div class="choice-input-row">
+                                    <input type="text" placeholder="Enter choice text">
+                                    <label class="checkbox-wrapper">
+                                        <input type="checkbox">
+                                        Correct
+                                    </label>
+                                    <button class="remove-btn" onclick="removeChoice(this)">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-row">
+                            <button class="btn btn-secondary" onclick="addChoice()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Add Choice
+                            </button>
+                            <button class="btn btn-primary" onclick="createQuestion()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                                Create Question
+                            </button>
+                        </div>
+
+                        <div class="response-area" id="createResponse" style="display: none;">
+                            <pre></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkApiStatus();
+            getAllQuestions();
+        });
+
+        function showSection(name) {
+            document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+            document.getElementById('section-' + name).style.display = 'block';
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        async function checkApiStatus() {
+            const dot = document.getElementById('statusDot');
+            const status = document.getElementById('apiStatus');
+
+            try {
+                const response = await fetch(API_BASE + '/');
+                if (response.ok) {
+                    dot.className = 'status-dot online';
+                    status.textContent = 'Online';
+                } else {
+                    dot.className = 'status-dot offline';
+                    status.textContent = 'Error';
+                }
+            } catch (e) {
+                dot.className = 'status-dot offline';
+                status.textContent = 'Offline';
+            }
+        }
+
+        async function getAllQuestions() {
+            const container = document.getElementById('questionsList');
+            container.innerHTML = '<p class="loading">Loading...</p>';
+
+            try {
+                const response = await fetch(API_BASE + '/');
+                const data = await response.json();
+                const questions = data.questionDTOList || [];
+
+                document.getElementById('totalQuestions').textContent = questions.length;
+                let totalChoices = 0;
+                questions.forEach(q => {
+                    if (q.choices) totalChoices += q.choices.length;
+                });
+                document.getElementById('totalChoices').textContent = totalChoices;
+
+                if (questions.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                            </svg>
+                            <p>No questions yet. Create your first one!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = questions.map(q => `
+                    <div class="question-card">
+                        <div class="question-header">
+                            <span class="question-title">${escapeHtml(q.title || 'Untitled')}</span>
+                            <span class="question-id">#${q.id}</span>
+                        </div>
+                        ${q.choices && q.choices.length > 0 ? `
+                            <div class="choices-grid">
+                                ${q.choices.map(c => `
+                                    <div class="choice-item ${c.valid ? 'valid' : 'invalid'}">
+                                        <span class="choice-icon">${c.valid ? '&#10003;' : '&#10005;'}</span>
+                                        <span>${escapeHtml(c.choiceTitle || 'Untitled')}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p style="color: var(--text-muted); font-size: 0.85rem;">No choices added</p>'}
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state"><p style="color: var(--error);">Error: ${e.message}</p></div>`;
+            }
+        }
+
+        async function getQuestionById() {
+            const id = document.getElementById('questionId').value;
+            const responseArea = document.getElementById('singleQuestionResponse');
+
+            if (!id) {
+                alert('Please enter a question ID');
+                return;
+            }
+
+            responseArea.style.display = 'block';
+            responseArea.querySelector('pre').textContent = 'Loading...';
+            responseArea.classList.remove('error');
+
+            try {
+                const response = await fetch(API_BASE + '/questions/' + id);
+
+                if (!response.ok) {
+                    throw new Error(`Question not found (HTTP ${response.status})`);
+                }
+
+                const data = await response.json();
+                responseArea.querySelector('pre').textContent = JSON.stringify(data, null, 2);
+
+            } catch (e) {
+                responseArea.classList.add('error');
+                responseArea.querySelector('pre').textContent = `Error: ${e.message}`;
+            }
+        }
+
+        function addChoice() {
+            const container = document.getElementById('choicesContainer');
+            const choiceDiv = document.createElement('div');
+            choiceDiv.className = 'choice-input-row';
+            choiceDiv.innerHTML = `
+                <input type="text" placeholder="Enter choice text">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox">
+                    Correct
+                </label>
+                <button class="remove-btn" onclick="removeChoice(this)">&times;</button>
+            `;
+            container.appendChild(choiceDiv);
+        }
+
+        function removeChoice(btn) {
+            const container = document.getElementById('choicesContainer');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+
+        async function createQuestion() {
+            const title = document.getElementById('newQuestionTitle').value;
+            const responseArea = document.getElementById('createResponse');
+
+            if (!title.trim()) {
+                alert('Please enter a question title');
+                return;
+            }
+
+            const choiceInputs = document.querySelectorAll('#choicesContainer .choice-input-row');
+            const choices = [];
+
+            choiceInputs.forEach(div => {
+                const text = div.querySelector('input[type="text"]').value;
+                const valid = div.querySelector('input[type="checkbox"]').checked;
+
+                if (text.trim()) {
+                    choices.push({
+                        choiceTitle: text,
+                        valid: valid
+                    });
+                }
+            });
+
+            const payload = {
+                title: title,
+                choices: choices
+            };
+
+            responseArea.style.display = 'block';
+            responseArea.querySelector('pre').textContent = 'Creating...';
+            responseArea.classList.remove('error');
+
+            try {
+                const response = await fetch(API_BASE + '/questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                responseArea.querySelector('pre').textContent = 'Created successfully!\n\n' + JSON.stringify(data, null, 2);
+
+                document.getElementById('newQuestionTitle').value = '';
+                document.getElementById('choicesContainer').innerHTML = `
+                    <div class="choice-input-row">
+                        <input type="text" placeholder="Enter choice text">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox">
+                            Correct
+                        </label>
+                        <button class="remove-btn" onclick="removeChoice(this)">&times;</button>
+                    </div>
+                `;
+
+                getAllQuestions();
+
+            } catch (e) {
+                responseArea.classList.add('error');
+                responseArea.querySelector('pre').textContent = `Error: ${e.message}`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

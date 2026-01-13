@@ -27,11 +27,13 @@ public class RestChannelDataService {
         this.mcqChoiceRepository = mcqChoiceRepository;
     }
 
+    @Transactional
     public QuestionDTO getQuestion(Integer id) throws PersistenceException {
         Question question = this.genericDataService.getQuestion(id);
         return extractDTO(question);
     }
 
+    @Transactional
     public QuestionListDTO getQuestions() throws PersistenceException {
         List<Question> questions = this.questionRepository.getAllQuestionsWithLimit(50);
         QuestionListDTO questionListDTO = new QuestionListDTO();
@@ -57,6 +59,7 @@ public class RestChannelDataService {
             choiceDTO.setValid(choice.isValid());
             choicesDTO.add(choiceDTO);
         }
+        dto.setChoices(choicesDTO);
         return dto;
     }
 
@@ -71,6 +74,7 @@ public class RestChannelDataService {
                 MCQChoice mcqChoice = new MCQChoice();
                 mcqChoice.setTitle(mcqChoiceDTO.getChoiceTitle());
                 mcqChoice.setValid(mcqChoiceDTO.getValid());
+                mcqChoice.setQuestion(question);
                 this.mcqChoiceRepository.create(mcqChoice);
                 mcqChoiceDTO.setId(mcqChoice.getId());
             }

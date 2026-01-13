@@ -1,0 +1,53 @@
+### Send POST request with json body
+POST http://localhost:8080/questions
+Content-Type: application/json
+
+{
+  "title": "what is jpa?",
+  "choices": [
+    {
+      "choiceTitle": "something",
+      "valid": true,
+      "id": 1
+    }
+  ]
+}
+
+### Send POST request with body as parameters
+POST https://examples.http-client.intellij.net/post
+Content-Type: application/x-www-form-urlencoded
+
+id = 999 &
+value = content &
+fact = IntelliJ %+ HTTP Client %= <3
+
+//TIP HTTP Client will format this x-www-form-urlencoded string properly
+
+### Send a form with the text and file fields
+POST https://examples.http-client.intellij.net/post
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="element-name"
+Content-Type: text/plain
+
+Name
+--WebAppBoundary
+Content-Disposition: form-data; name="data"; filename="data.json"
+Content-Type: application/json
+
+< ./request-form-data.json
+--WebAppBoundary--
+
+### Send request with dynamic variables in request's body
+POST https://examples.http-client.intellij.net/post
+Content-Type: application/json
+
+{
+  "id": {{$random.uuid}},
+  "price": {{$random.integer()}},
+  "ts": {{$timestamp}},
+  "value": "content"
+}
+
+###
