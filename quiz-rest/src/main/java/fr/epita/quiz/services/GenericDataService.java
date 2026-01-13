@@ -1,4 +1,4 @@
-package fr.epita.quiz.services.data;
+package fr.epita.quiz.services;
 
 import fr.epita.quiz.datamodel.MCQChoice;
 import fr.epita.quiz.datamodel.Question;
@@ -33,5 +33,11 @@ public class GenericDataService {
     }
 
 
+    public Question getQuestion(Integer id) {
+        return null;
+    }
 
+    public List<MCQChoice> getChoices(Question question) {
+        return null;
+    }
 }
